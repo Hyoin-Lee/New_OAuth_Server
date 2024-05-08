@@ -17,6 +17,7 @@ github = oauth.register('github',
 # MQTT broker details
 MQTT_BROKER = '127.0.0.1'
 MQTT_PORT = 1883
+MQTT_TOPIC = 'control_led'
 
 
 @app.route('/login')
@@ -36,7 +37,7 @@ def authorize():
     return redirect('/')
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
     session.pop('user_name', None)
     return redirect('/')
@@ -49,8 +50,40 @@ def hello_world():
         return f"Hello, stranger. Please {login_button} to continue."
     else:
         logout_button = '<a href="' + url_for('logout') + '">logout</a>'
-        return f"Hello, {session['user_name']}. You are now logged in. {logout_button}"
+        control_led_on_button = '''
+                    <form action="/control_led_on" method="post">
+                        <button type="submit">Turn LED On</button>
+                    </form>
+                '''
+        control_led_off_button = '''
+                    <form action="/control_led_off" method="post">
+                        <button type="submit">Turn LED Off</button>
+                    </form>
+                '''
+        return f"Hello, {session['user_name']}. You are now logged in. {logout_button}<br>{control_led_on_button} {control_led_off_button}"
 
+
+
+@app.route('/control_led_on', methods=['POST'])
+def control_led_on():
+    if 'user_name' not in session:
+        return 'User not logged in', 403
+
+    # Publish MQTT message to turn LED on
+    publish.single(MQTT_TOPIC, 'on', hostname=MQTT_BROKER, port=MQTT_PORT)
+
+    return 'LED turned on'
+
+
+@app.route('/control_led_off', methods=['POST'])
+def control_led_off():
+    if 'user_name' not in session:
+        return 'User not logged in', 403
+
+    # Publish MQTT message to turn LED off
+    publish.single(MQTT_TOPIC, 'off', hostname=MQTT_BROKER, port=MQTT_PORT)
+
+    return 'LED turned off'
 
 
 if __name__ == '__main__':
