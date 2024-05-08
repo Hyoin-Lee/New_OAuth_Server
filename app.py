@@ -1,7 +1,24 @@
 from flask import Flask, request, session, redirect, url_for
+import paho.mqtt.publish as publish
 
 app = Flask(__name__)
 app.secret_key = '635dc513f73c32d219843a6d5d81d3a29e289f6b'
+
+# MQTT broker details
+MQTT_BROKER = '127.0.0.1:8888'
+MQTT_PORT = 1883
+
+
+@app.route("/login", methods=['POST'])
+def login():
+    username = request.form.get("username")
+    # Assuming user authentication here, replace with your logic
+    if username == "admin":
+        # Publish login status to MQTT broker
+        publish.single("login_status", "user_logged_in", hostname=MQTT_BROKER, port=MQTT_PORT)
+        return "Logged in successfully"
+    else:
+        return "Login failed"
 
 
 @app.route('/', methods=['GET', 'POST'])
