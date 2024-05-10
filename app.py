@@ -63,7 +63,6 @@ def hello_world():
         return f"Hello, {session['user_name']}. You are now logged in. {logout_button}<br>{control_led_on_button} {control_led_off_button}"
 
 
-
 @app.route('/control_led_on', methods=['POST'])
 def control_led_on():
     if 'user_name' not in session:
