@@ -24,7 +24,7 @@ MQTT_TOPIC = 'control_led'
 def login():
     # code from authlib documentation
     redirect_uri = url_for('authorize', _external=True)
-    return github.authorize_redirect(redirect_uri)
+    return github.authorize_redirect(redirect_uri, prompt='consent')
 
 
 @app.route('/authorize')
